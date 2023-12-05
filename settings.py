@@ -3,6 +3,6 @@ class Settings:
         self.set_default()
 
     def set_default(self):
-        self.width = 800
-        self.heigth = 600
+        self.width = 1280
+        self.heigth = 800
 

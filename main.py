@@ -49,8 +49,14 @@ class SimpleApp:
         # Minimum and maximum values for min_gap
         self.min_gap_min_value = 0
         self.min_gap_max_value = 200
-        self.min_gap_entry = tk.Entry(self.input_frame, validate='key', validatecommand=(self.validate_min_gap, '%P'))
+        self.min_gap_step = 10
+        self.min_gap_values_list = list(range(self.min_gap_min_value, self.min_gap_max_value + self.min_gap_step, self.min_gap_step))
+        self.min_gap_value = tk.IntVar()
+        self.min_gap_entry = ttk.Combobox(self.input_frame, textvariable=self.min_gap_value,
+                                          values=self.min_gap_values_list)
         self.min_gap_entry.pack()
+        # self.min_gap_entry = tk.Entry(self.input_frame, validate='key', validatecommand=(self.validate_min_gap, '%P'))
+        # self.min_gap_entry.pack()
 
         # Calculate button
         self.calculate_button = tk.Button(self.input_frame, text="Calculate", command=self.calculate)
@@ -61,6 +67,25 @@ class SimpleApp:
         self.calculated_label.pack()
         self.support_label = tk.Label(self.input_frame, text="")
         self.support_label.pack()
+
+
+        # Create a Treeview widget
+        self.tree = ttk.Treeview(master)
+        self.tree["columns"] = list(str(f'DN{dn}') for dn in self.pipe_dimensions_list)
+        # self.tree["columns"] = ("Column 1", "Column 2", "Column 3")
+
+        # Define column headings
+        # self.tree.heading("#0", text="Index")
+        for dn in self.pipe_dimensions_list:
+            self.tree.heading(f'DN{dn}', text=f'DN{dn}')
+
+        # Insert sample data
+        for dn in self.pipe_dimensions_list:
+            self.tree.insert('', dn, values = list(pipe_dimensions[d]['OD'] + int(dn) for d in pipe_dimensions.keys()))
+
+        # Pack the Treeview widget
+        self.tree.pack()
+        
 
         # Adding quit button into the content_frame
         self.quit_button = tk.Button(self.content_frame, text="Quit", command=master.quit)
@@ -74,15 +99,15 @@ class SimpleApp:
 
         # Perform calculation (sum of DN_1, DN_2, and min_gap)
         flange_dn_1_od = flange_dimensions['PN16'][str(dn_1_value)]['OD']
-        pipe_dn_1_od = pipe_dimensions[str(dn_2_value)]['OD']
-        sum_value = int(math.ceil((flange_dn_1_od/2 + pipe_dn_1_od/2 + min_gap_value) / 10)) * 10
+        pipe_dn_2_od = pipe_dimensions[str(dn_2_value)]['OD']
+        sum_value = int(math.ceil((flange_dn_1_od/2 + pipe_dn_2_od/2 + min_gap_value) / 10)) * 10
         # od_value = flange_dimensions['PN16'][str(dn_1_value)]['OD']
         # print(f'{od_value}')
         calculated_value = f"Calculated Value: DN{dn_1_value} + DN{dn_2_value} + {min_gap_value} = {sum_value}"
 
         # Update the calculated label
         self.calculated_label.config(text=calculated_value)
-        # self.support_label.config(text=f'{flange_dn_1_od = }  {pipe_dn_1_od = }')
+        # self.support_label.config(text=f'{flange_dn_1_od = }  {pipe_dn_2_od = }')
 
 
     def validate_min_gap(self, value):
